@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">WowTest</string>
+    <string name="title_activity_google_maps">Map</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="permission_denied">Permission was denied. Map access error</string>
+    <string name="loading">Loading. Please, wait</string>
+    <string name="address">Address: </string>
+    <string name="phone">Phone: </string>
+    <string name="site">Website: </string>
+    <string name="distance">Distance: </string>
+    <string name="categories">Categories: </string>
+    <string name="twitter">Twitter: </string>
+    <string name="meters"> m</string>
+</resources>
