@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by timofey on 04.02.2017.
  */
 
-public class Restaurant implements Serializable {
+public class GeoPoint implements Serializable {
 
     private String name;
     private String address;
@@ -20,7 +20,12 @@ public class Restaurant implements Serializable {
     private String formattedPhone;
     private String twitter;
 
-    public Restaurant(String name, String address, double latitude, double longitude, String category, int distance, String iconUrl, String url, String phone, String formattedPhone, String twitter) {
+    public GeoPoint(double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public GeoPoint(String name, String address, double latitude, double longitude, String category, int distance, String iconUrl, String url, String phone, String formattedPhone, String twitter) {
         this.name = name;
         this.address = address;
         this.latitude = latitude;

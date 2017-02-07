@@ -2,12 +2,8 @@ package com.example.timofey.wowtest;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,9 +12,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -45,15 +39,15 @@ public class FoursquareConnector extends AsyncTask<Void, Void, String>{
     private double latitude, longitude;
     private String url;
     private Context context;
+    String broadcastAction;
 
 
-    public FoursquareConnector(Context context, double latitude, double longitude) {
+    public FoursquareConnector(Context context, double latitude, double longitude, String broadcastAction) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.context = context;
+        this.broadcastAction = broadcastAction;
 
-
-        //TODO background launcher
     }
 
 
@@ -85,16 +79,15 @@ public class FoursquareConnector extends AsyncTask<Void, Void, String>{
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
 
-        Intent intent = new Intent(GoogleMapsFragment.BROADCAST_ACTION);
+        Intent intent = new Intent(broadcastAction);
         intent.putExtra(EXTRA_RESTAURANTS, parseResponse(s));
         context.sendBroadcast(intent);
-
     }
 
 
-    private ArrayList<Restaurant> parseResponse(String response){
+    private ArrayList<GeoPoint> parseResponse(String response){
 
-        ArrayList<Restaurant> restaurants = new ArrayList<>();
+        ArrayList<GeoPoint> geoPoints = new ArrayList<>();
 
         try {
             JSONObject fullObject = new JSONObject(response);
@@ -130,7 +123,6 @@ public class FoursquareConnector extends AsyncTask<Void, Void, String>{
                             } else {
                                 categories += ", " + categoriesArray.getJSONObject(j).getString("name");
                             }
-                            Log.d("category", categories);
                         }
                     } catch (JSONException e){
                         Log.e(TAG, e.getLocalizedMessage());
@@ -142,7 +134,6 @@ public class FoursquareConnector extends AsyncTask<Void, Void, String>{
                     } catch (JSONException e){
                         distance = 0;
                     }
-
 
                     String iconUrl;
                     try {
@@ -175,14 +166,13 @@ public class FoursquareConnector extends AsyncTask<Void, Void, String>{
                         twitter = null;
                     }
 
-                    restaurants.add(new Restaurant(name, address, latitude, longitude, categories, distance, iconUrl, url, phone, formattedPhone, twitter));
+                    geoPoints.add(new GeoPoint(name, address, latitude, longitude, categories, distance, iconUrl, url, phone, formattedPhone, twitter));
                 }
              }
 
-            Log.d(TAG, meta.getString("code"));
         } catch (JSONException e) {
             Log.e(TAG, e.getLocalizedMessage());
         }
-        return restaurants;
+        return geoPoints;
     }
 }

@@ -1,69 +1,42 @@
 package com.example.timofey.wowtest;
 
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.foursquare.android.nativeoauth.FoursquareOAuth;
-import com.foursquare.android.nativeoauth.model.AuthCodeResponse;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import static com.example.timofey.wowtest.GoogleMapsFragment.LOCATION_REQUEST_CODE;
+import static com.example.timofey.wowtest.HereMapsFragment.WRITE_EXTERNAL_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int REQUEST_CODE_FSQ_CONNECT = 3459;
     public static final String CLIENT_ID = "CU02QTDIBCJWNID4YYO05334BNJIEL5CF4EYXFY3WICW0YHR";
 
+    private int providerCode = 0;
 
-    GoogleMapsFragment googleMapsFragment;
     FragmentTransaction fragmentTransaction;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        googleMapsFragment = (GoogleMapsFragment) fragmentManager.findFragmentByTag(GoogleMapsFragment.TAG);
-//
-//        if (googleMapsFragment == null){
-//            googleMapsFragment = new GoogleMapsFragment();
-//        }
-//        fragmentTransaction = fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.map, googleMapsFragment, GoogleMapsFragment.TAG);
-//        fragmentTransaction.commit();
-
-
-//        Intent intent = FoursquareOAuth.getConnectIntent(getApplicationContext(), CLIENT_ID);
-//        startActivityForResult(intent, REQUEST_CODE_FSQ_CONNECT);
-
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
-
-
-    //    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        switch (requestCode) {
-//            case REQUEST_CODE_FSQ_CONNECT:
-//                AuthCodeResponse codeResponse = FoursquareOAuth.getAuthCodeFromResult(resultCode, data);
-//            /* ... */
-//                break;
-//        }
-//    }
 
 
 
@@ -77,7 +50,102 @@ public class MainActivity extends AppCompatActivity {
 
             finish();
             startActivity(getIntent());
+        } else if (requestCode == WRITE_EXTERNAL_REQUEST_CODE) {
+            boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+            finish();
+            startActivity(getIntent());
         }
     }
+
+
+    private void setHereApiProvider(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        HereMapsFragment hereMapsFragment = (HereMapsFragment) fragmentManager.findFragmentByTag(HereMapsFragment.TAG);
+
+        if (hereMapsFragment == null){
+            hereMapsFragment = new HereMapsFragment();
+        }
+
+        fragmentTransaction = fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.activity_main, hereMapsFragment, HereMapsFragment.TAG);
+        fragmentTransaction.commit();
+    }
+
+    private void setGoogleApiProvider(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        GoogleMapsFragment googleMapsFragment = (GoogleMapsFragment) fragmentManager.findFragmentByTag(GoogleMapsFragment.TAG);
+
+        if (googleMapsFragment == null){
+            googleMapsFragment = new GoogleMapsFragment();
+        }
+
+        fragmentTransaction = fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.activity_main, googleMapsFragment, GoogleMapsFragment.TAG);
+        fragmentTransaction.commit();
+    }
+
+    public Location getCurrentLocation(){
+
+        Location location = null;
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            } else {
+                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            if (location == null){
+                location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            }
+        }
+        return location;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.choose_provider:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.dialog_title);
+
+                builder.setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.setSingleChoiceItems(R.array.providers, providerCode, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        providerCode = which;
+                    }
+                });
+
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (providerCode == 1){
+                            setHereApiProvider();
+                        } else {
+                            setGoogleApiProvider();
+                        }
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                break;
+        }
+        return true;
+    }
+
 
 }

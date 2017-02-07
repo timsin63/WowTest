@@ -23,27 +23,45 @@
 
     <TextView
         android:id="@+id/address"
+        android:paddingLeft="@dimen/info_text_padding_left"
+        android:paddingTop="@dimen/info_text_padding_top"
+        android:textSize="@dimen/info_text_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/category"
+        android:paddingLeft="@dimen/info_text_padding_left"
+        android:paddingTop="@dimen/info_text_padding_top"
+        android:textSize="@dimen/info_text_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/distance"
+        android:paddingLeft="@dimen/info_text_padding_left"
+        android:paddingTop="@dimen/info_text_padding_top"
+        android:textSize="@dimen/info_text_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <TextView
         android:id="@+id/phone"
+        android:paddingLeft="@dimen/info_text_padding_left"
+        android:paddingTop="@dimen/info_text_padding_top"
+        android:textSize="@dimen/info_text_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <TextView
         android:id="@+id/site"
+        android:paddingLeft="@dimen/info_text_padding_left"
+        android:paddingTop="@dimen/info_text_padding_top"
+        android:textSize="@dimen/info_text_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <TextView
+        android:paddingLeft="@dimen/info_text_padding_left"
+        android:paddingTop="@dimen/info_text_padding_top"
+        android:textSize="@dimen/info_text_size"
         android:id="@+id/twitter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

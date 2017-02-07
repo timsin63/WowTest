@@ -5,8 +5,8 @@
     tools:context="com.example.timofey.wowtest.HereMapsFragment">
 
     <fragment
+        android:id="@+id/here_map_fragment"
         class="com.here.android.mpa.mapping.MapFragment"
-        android:id="@+id/mapfragment"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"/>
 

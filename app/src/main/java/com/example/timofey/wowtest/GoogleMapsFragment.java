@@ -29,7 +29,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static android.content.Context.LOCATION_SERVICE;
 import static com.example.timofey.wowtest.FoursquareConnector.EXTRA_RESTAURANTS;
 
 
@@ -43,9 +42,6 @@ public class GoogleMapsFragment extends SupportMapFragment implements OnMapReady
 
     private View view = null;
     private GoogleMap googleMap;
-    LocationManager locationManager;
-    ProgressBar loadingBar;
-    TextView loadingText;
 
     public GoogleMapsFragment(){
     }
@@ -82,25 +78,15 @@ public class GoogleMapsFragment extends SupportMapFragment implements OnMapReady
                 == PackageManager.PERMISSION_GRANTED) {
             this.googleMap.setMyLocationEnabled(true);
 
-            locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-            Location location;
-
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            } else {
-                location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            }
-            if (location == null){
-                location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            }
+            Location location = ((MainActivity) getActivity()).getCurrentLocation();
 
             if (location != null) {
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14);
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
                 this.googleMap.animateCamera(cameraUpdate);
 
 
-                FoursquareConnector foursquareConnector = new FoursquareConnector(getActivity().getApplicationContext(),location.getLatitude(), location.getLongitude());
+                FoursquareConnector foursquareConnector = new FoursquareConnector(getActivity().getApplicationContext(),location.getLatitude(), location.getLongitude(), BROADCAST_ACTION);
                 foursquareConnector.execute();
 
                 getActivity().registerReceiver(restaurantsReceiver, new IntentFilter(BROADCAST_ACTION));
@@ -113,28 +99,36 @@ public class GoogleMapsFragment extends SupportMapFragment implements OnMapReady
     }
 
 
-
     BroadcastReceiver restaurantsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            ArrayList<Restaurant> list = (ArrayList<Restaurant>) intent.getSerializableExtra(EXTRA_RESTAURANTS);
+            ArrayList<GeoPoint> list = (ArrayList<GeoPoint>) intent.getSerializableExtra(EXTRA_RESTAURANTS);
             HashMap<String, Boolean> markerSet = new HashMap<>();
 
-            for (Restaurant restaurant : list) {
+            for (GeoPoint geoPoint : list) {
                 MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(restaurant.getLatitude(), restaurant.getLongitude()));
-                markerOptions.title(restaurant.getName());
+                markerOptions.position(new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude()));
+                markerOptions.title(geoPoint.getName());
 
-                String restaurantJson = new Gson().toJson(restaurant);
+                String restaurantJson = new Gson().toJson(geoPoint);
                 markerOptions.snippet(restaurantJson);
 
                 Marker marker = googleMap.addMarker(markerOptions);
 
                 markerSet.put(marker.getId(), false);
+
             }
-            googleMap.setInfoWindowAdapter(new GoogleInfoWindowAdapter(getContext(), markerSet));
+            googleMap.setInfoWindowAdapter(new MapInfoAdapter(getContext(), markerSet));
         }
     };
 
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (restaurantsReceiver != null) {
+            getActivity().unregisterReceiver(restaurantsReceiver);
+        }
+    }
 }
