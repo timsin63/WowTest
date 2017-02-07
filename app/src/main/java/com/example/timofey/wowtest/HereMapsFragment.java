@@ -134,11 +134,4 @@ public class HereMapsFragment extends Fragment {
         }
     };
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (hereObjectsReceiver != null){
-            getActivity().unregisterReceiver(hereObjectsReceiver);
-        }
-    }
 }

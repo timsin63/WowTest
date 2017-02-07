@@ -1,9 +1,12 @@
 package com.example.timofey.wowtest;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -11,9 +14,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import static com.example.timofey.wowtest.GoogleMapsFragment.LOCATION_REQUEST_CODE;
 import static com.example.timofey.wowtest.HereMapsFragment.WRITE_EXTERNAL_REQUEST_CODE;
@@ -23,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String CLIENT_ID = "CU02QTDIBCJWNID4YYO05334BNJIEL5CF4EYXFY3WICW0YHR";
 
     private int providerCode = 0;
+    Location location = null;
+    LocationProvider provider = null;
 
     FragmentTransaction fragmentTransaction;
 
@@ -30,14 +37,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
-
 
 
     @Override
@@ -59,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void setHereApiProvider(){
+    private void setHereApiProvider() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         HereMapsFragment hereMapsFragment = (HereMapsFragment) fragmentManager.findFragmentByTag(HereMapsFragment.TAG);
 
-        if (hereMapsFragment == null){
+        if (hereMapsFragment == null) {
             hereMapsFragment = new HereMapsFragment();
         }
 
@@ -71,11 +74,11 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    private void setGoogleApiProvider(){
+    private void setGoogleApiProvider() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         GoogleMapsFragment googleMapsFragment = (GoogleMapsFragment) fragmentManager.findFragmentByTag(GoogleMapsFragment.TAG);
 
-        if (googleMapsFragment == null){
+        if (googleMapsFragment == null) {
             googleMapsFragment = new GoogleMapsFragment();
         }
 
@@ -83,23 +86,36 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    public Location getCurrentLocation(){
+    public Location getCurrentLocation() {
 
-        Location location = null;
+
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            final LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            } else {
+            } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
-            if (location == null){
+            if (location == null) {
                 location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            }
+            if (location == null) {
+                Intent gpsOptionsIntent = new Intent(
+                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+
+                Toast.makeText(getApplicationContext(), getString(R.string.turn_on), Toast.LENGTH_SHORT).show();
+                startActivity(gpsOptionsIntent);
+                MainActivity.this.finish();
             }
         }
         return location;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

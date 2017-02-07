@@ -42,6 +42,7 @@ public class GoogleMapsFragment extends SupportMapFragment implements OnMapReady
 
     private View view = null;
     private GoogleMap googleMap;
+    private SupportMapFragment supportMapFragment;
 
     public GoogleMapsFragment(){
     }
@@ -56,7 +57,7 @@ public class GoogleMapsFragment extends SupportMapFragment implements OnMapReady
             view = inflater.inflate(R.layout.fragment_google_maps, container, false);
         }
 
-        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         supportMapFragment.getMapAsync(this);
         return view;
@@ -123,12 +124,4 @@ public class GoogleMapsFragment extends SupportMapFragment implements OnMapReady
         }
     };
 
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (restaurantsReceiver != null) {
-            getActivity().unregisterReceiver(restaurantsReceiver);
-        }
-    }
 }

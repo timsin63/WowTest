@@ -20,6 +20,7 @@
     <string name="set_search_radius">Set search radius</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="turn_on">For using the app you must turn on the GPS</string>
     <string-array name="providers">
         <item>Google Maps</item>
         <item>Here Maps</item>
